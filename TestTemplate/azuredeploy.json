@@ -4,6 +4,7 @@
     "parameters": {
         "appServicePlan":{
             "type": "string",
+            "minLength": 10,
             "metadata": {
                 "description": "Name of App service plan"
             }
