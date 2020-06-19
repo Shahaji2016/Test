@@ -1,0 +1,229 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appServicePlan":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of App service plan"
+            }
+        },
+        "newAppServicePlanName":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of New app serice plan"
+            }
+        },
+        "appServicePlanLocation":{
+            "type": "string",
+            "metadata": {
+                "description": "App service plan location"
+            }
+        },
+        "sku":{
+            "type": "string",
+            "metadata": {
+                "description": "SKU name"
+            }
+        },
+        "skuCode":{
+            "type": "string",
+            "metadata": {
+                "description": "SKU code"
+            }
+        },
+        "conditionForServer":{
+            "type": "bool",
+            "metadata": {
+                "description": "Condition for server"
+            }
+        },
+        "newDatabaseServerName":{
+            "type": "string",
+            "metadata": {
+                "description": "New database server name"
+            }
+        },
+        "existingServerList":{
+            "type": "string",
+            "metadata": {
+                "description": "Existing server list"
+            }
+        },
+        "mysqlLocation":{
+            "type": "string",
+            "metadata": {
+                "description": "Mysql Location"
+            }
+        },
+        "version":{
+            "type": "string",
+            "metadata": {
+                "description": "Version"
+            }
+        },
+        "serverAdminLoginName":{
+            "type": "string",
+            "metadata": {
+                "description": "Server admin login name"
+            }
+        },
+        "password":{
+            "type": "securestring",
+            "metadata": {
+                "description": "Password"
+            }
+        },
+        "skuSizeMB":{
+            "type": "int",
+            "metadata": {
+                "description": "SKU size MB"
+            }
+        },
+        "backupRetentionPeriod":{
+            "type": "string",
+            "metadata": {
+                "description": "Backup retention period"
+            }
+        },
+        "geoRedundantBackup":{
+            "type": "string",
+            "metadata": {
+                "description": "Gro redundant bakup"
+            }
+        },
+        "skuName":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the sku"
+            }
+        },
+        "skuTier":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the SKU tier"
+            }
+        },
+        "vCore":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the vCOre"
+            }
+        },
+        "skuFamily":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the sku family"
+            }
+        },
+        "newDataBaseName":{
+            "type": "string",
+            "metadata": {
+                "description": "Name of the database"
+            }
+        }
+    },
+    "resources": [
+        {
+            "condition": "[equals(parameters('appServicePlan'),'Create New')]",
+            "apiVersion": "2016-09-01",
+            "name": "[parameters('newAppServicePlanName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[parameters('appServicePlanLocation')]",
+            "properties": {
+                "name": "[parameters('newAppServicePlanName')]",
+                "reserved": true,
+                "numberOfWorkers": "1"
+            },
+            "sku": {
+                "Tier": "[parameters('sku')]",
+                "Name": "[parameters('skuCode')]"
+            },
+            "kind": "linux",
+            "tags": {
+            },
+            "copy": {
+                "count": 1,
+                "name": "servicePlanCopy"
+            }
+        },
+        {
+            "apiVersion": "2018-05-01",
+            "name": "Server_Properties",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "condition": "[parameters('conditionForServer')]",
+                            "name": "[if(equals(parameters('newDatabaseServerName'),parameters('existingServerList')),'dummyserver1',parameters('newDatabaseServerName'))]",
+                            "type": "Microsoft.DBforMySQL/servers",
+                            "apiVersion": "2017-12-01",
+                            "tags": {
+                            },
+                            "location": "[if(empty(parameters('mysqlLocation')),parameters('appServicePlanLocation'),parameters('mysqlLocation'))]",
+                            "properties": {
+                                "version": "[parameters('version')]",
+                                "administratorLogin": "[parameters('serverAdminLoginName')]",
+                                "administratorLoginPassword": "[parameters('password')]",
+                                "storageProfile": {
+                                    "storageMB": "[parameters('skuSizeMB')]",
+                                    "backupRetentionDays": "[parameters('backupRetentionPeriod')]",
+                                    "geoRedundantBackup": "[parameters('geoRedundantBackup')]"
+                                },
+                                "sslEnforcement": "Disabled"
+                            },
+                            "sku": {
+                                "name": "[parameters('skuName')]",
+                                "tier": "[parameters('skuTier')]",
+                                "capacity": "[int(parameters('vCore'))]",
+                                "size": "[parameters('skuSizeMB')]",
+                                "family": "[parameters('skuFamily')]"
+                            },
+                            "resources": [
+                                {
+                                    "condition": "[parameters('conditionForServer')]",
+                                    "name": "AllowAll",
+                                    "type": "firewallrules",
+                                    "tags": {
+                                    },
+                                    "apiVersion": "2017-12-01",
+                                    "properties": {
+                                        "startIpAddress": "0.0.0.0",
+                                        "endIpAddress": "255.255.255.255"
+                                    },
+                                    "location": "[if(empty(parameters('mysqlLocation')),parameters('appServicePlanLocation'),parameters('mysqlLocation'))]",
+                                    "dependsOn": [
+                                        "[concat('Microsoft.DBforMySQL/servers/', if(equals(parameters('newDatabaseServerName'),parameters('existingServerList')),'dummyserver1',parameters('newDatabaseServerName')))]"
+                                    ]
+                                },
+                                {
+                                    "condition": "[parameters('conditionForServer')]",
+                                    "name": "[if(parameters('conditionForServer'),parameters('newDataBaseName'),'tempdb001')]",
+                                    "tags": {
+                                    },
+                                    "type": "databases",
+                                    "location": "[if(empty(parameters('mysqlLocation')),parameters('appServicePlanLocation'),parameters('mysqlLocation'))]",
+                                    "apiVersion": "2017-12-01",
+                                    "properties": {
+                                        "charset": "utf8",
+                                        "collation": "utf8_general_ci"
+                                    },
+                                    "dependsOn": [
+                                        "[concat('Microsoft.DBforMySQL/servers/', if(equals(parameters('newDatabaseServerName'),parameters('existingServerList')),'dummyserver1',parameters('newDatabaseServerName')))]"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+    
+    }
+}
