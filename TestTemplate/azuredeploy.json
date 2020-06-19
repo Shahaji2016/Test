@@ -10,7 +10,8 @@
             }
         },
         "newAppServicePlanName":{
-            "type": "string",
+            "type": "int",
+            "minValue": 10485760,
             "metadata": {
                 "description": "Name of New app serice plan"
             }
