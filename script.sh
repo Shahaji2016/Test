@@ -155,7 +155,7 @@ join_domain_sles(){
 	echo y | sudo zypper in krb5-client samba-winbind ntp
 	
 	
-	WORKGROUPNAME=(${DOMAINNAME//./ })
+	WORKGROUPNAME=${DOMAINNAME//./ }
 	
 	sudo sed -i 's/workgroup = WORKGROUP/workgroup = ${WORKGROUPNAME[0]}/g'  /etc/samba/smb.conf
 	sudo sed -i 's/usershare allow guests = Yes/usershare allow guests = NO/g'  /etc/samba/smb.conf
