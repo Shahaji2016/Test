@@ -2,15 +2,15 @@
 #                         ################ ==|Install Prerequisites and AD Domain join setup on Linux VM|== ####################                                        
 #                                                                                                                            
 #  File name: domain_join_script.sh                                                                         
-#  Owner:  Satheeshkumar Ramasamy                                                                                                      
-#  Tester: Satheeshkumar Ramasamy                                                                                                       
+#  Owner:  Shahaji Nalawade                                                                                                     
+#  Tester: Shahaji Nalawade                                                                                                      
 #  Reviewer:                                                                                                                 
 #  Environment: Azure Productions                                                                                           
 #  Description: This script will do install Prerequisites and AD Domain join setup on Linux VM in bash file.         
 #
 #  Support -Verbose option
 #
-#  Written by Satheeshkumar Ramasamy <satheeshkumar.ramasamy@kyndryl.com> 
+#  Written by Shahaji Nalawade
 #
 #  Version 1.0 - 2021-07-25
 #
@@ -53,7 +53,7 @@ fi
 
 
 #Loop through options passed
-while getopts "d:f:n:o:p:u:vh" optname; do
+while getopts "d:f:n:o:p:u:v:h" optname; do
   log "Option $optname set with value ${OPTARG}"
   case $optname in
     d) #set domain name
