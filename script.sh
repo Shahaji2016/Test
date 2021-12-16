@@ -19,7 +19,7 @@
 
 help()
 {
-    echo "This script install Prerequisites and AD Domain join s	etup on Linux OS"
+    echo "This script install Prerequisites and AD Domain join setup on Linux OS"
     echo "Parameters:"
     echo "  -d AD Domain Join Domain name"
     echo "  -o AD Domain Join OSTYPE "
