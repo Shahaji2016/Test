@@ -28,10 +28,14 @@ help()
 	echo "  -v AD Domain Join OSVERSION "
     echo "  -h view this help content"
 }
-# Log method to control/redirect log output
+
 log()
 {
-    echo "$1"
+    if [[  $1 == *"Option p set with value"* ]]; then
+        echo "Option p set with value ******"
+    else
+        echo $1
+    fi
 }
 
 log "Begin execution of install Prerequisites and AD Domain join setup script extension on ${HOSTNAME}"
